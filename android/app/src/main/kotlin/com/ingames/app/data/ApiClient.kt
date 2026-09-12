@@ -21,7 +21,7 @@ object TokenManager {
 }
 
 object ApiClient {
-    var baseUrl = "http://10.0.2.2:8080" // Android emulator loopback or localhost
+    var baseUrl = "http://3.110.124.137:8080" // Live EC2 Server IP
 
     val jsonConfig = Json {
         ignoreUnknownKeys = true
