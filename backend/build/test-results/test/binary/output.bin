@@ -1,0 +1,7 @@
+¤2026-09-11 21:39:43.836 [DefaultDispatcher-worker-1 @call-context#2] INFO  ktor.test - No ktor.deployment.watch patterns specified, automatic reload is not active.
+‹2026-09-11 21:39:43.845 [DefaultDispatcher-worker-1 @call-context#2] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+†2026-09-11 21:39:44.870 [DefaultDispatcher-worker-1 @call-context#2] WARN  c.ingames.database.DatabaseFactory - PostgreSQL connection unavailable (Failed to initialize pool: Connection to localhost:5432 refused. Check that the hostname and port are correct and that the postmaster is accepting TCP/IP connections.). Initializing in-memory fallback store for standalone development/testing.
+}2026-09-11 21:39:45.004 [DefaultDispatcher-worker-1 @call-context#2] INFO  ktor.test - Application started in 1.171 seconds.
+›2026-09-11 21:39:45.005 [DefaultDispatcher-worker-1 @call-context#2] INFO  ktor.test - Application started: io.ktor.server.application.Application@f466d83
+v2026-09-11 21:39:45.005 [DefaultDispatcher-worker-4 @coroutine#4] INFO  ktor.test - Responding at http://localhost:80
+x2026-09-11 21:39:45.005 [DefaultDispatcher-worker-4 @coroutine#4] INFO  ktor.test - Responding at https://localhost:443

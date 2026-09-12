@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ingames.ProvablyFairTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-09-11T16:09:48" hostname="satyams-Mac-mini.local" time="0.026">
+  <properties/>
+  <testcase name="test dice derivation produces valid 1 to 6 range and 2 to 12 total()" classname="com.ingames.ProvablyFairTest" time="0.011"/>
+  <testcase name="test dragon tiger card values are in 1 to 13 range()" classname="com.ingames.ProvablyFairTest" time="0.007"/>
+  <testcase name="test crash point derivation respects 1x minimum and multiplier scale()" classname="com.ingames.ProvablyFairTest" time="0.006"/>
+  <testcase name="test SHA-256 seed hashing is deterministic()" classname="com.ingames.ProvablyFairTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
