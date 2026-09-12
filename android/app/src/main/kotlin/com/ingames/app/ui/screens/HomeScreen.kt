@@ -122,16 +122,18 @@ fun HomeScreen(
             onWalletClick = onWalletClick
         )
 
-        // 2. FIXED SECTION: Online Players Ticker
-        OnlineTicker(onlineCount = 89206)
-
-        // 3. SCROLLABLE CONTENT AREA
+        // SCROLLABLE CONTENT AREA (Includes Online Ticker & Game Cards)
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(top = 10.dp, bottom = 100.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp)
+            contentPadding = PaddingValues(top = 0.dp, bottom = 100.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            // PROMOTION BANNER (3rd Item)
+            // ONLINE PLAYERS TICKER (Scrollable with screen)
+            item {
+                OnlineTicker(onlineCount = 89206)
+            }
+
+            // PROMOTION BANNER
             item {
                 Box(modifier = Modifier.padding(horizontal = 14.dp)) {
                     ChampionsLeagueBanner(

@@ -1,0 +1,14 @@
+§2026-09-12 20:30:51.681 [DefaultDispatcher-worker-1 @call-context#2] INFO  ktor.test - No ktor.deployment.watch patterns specified, automatic reload is not active.
+ã2026-09-12 20:30:51.703 [DefaultDispatcher-worker-1 @call-context#2] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+π2026-09-12 20:30:52.008 [DefaultDispatcher-worker-1 @call-context#2] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@7432cef3
+ê2026-09-12 20:30:52.009 [DefaultDispatcher-worker-1 @call-context#2] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+ß2026-09-12 20:30:52.022 [DefaultDispatcher-worker-1 @call-context#2] INFO  c.ingames.database.DatabaseFactory - Connected successfully to PostgreSQL at localhost:5432
+ì2026-09-12 20:30:52.065 [DefaultDispatcher-worker-1 @call-context#2] INFO  c.ingames.database.DatabaseFactory - Applied migration: 001_initial.sql
+ú2026-09-12 20:30:52.135 [DefaultDispatcher-worker-1 @call-context#2] INFO  c.ingames.database.DatabaseFactory - Applied migration: 002_wallet_integrity.sql
+ñ2026-09-12 20:30:52.152 [DefaultDispatcher-worker-1 @call-context#2] INFO  c.ingames.database.DatabaseFactory - Applied migration: 003_admin_auth.sql
+ö2026-09-12 20:30:52.166 [DefaultDispatcher-worker-1 @call-context#2] INFO  c.ingames.database.DatabaseFactory - Applied migration: 004_game_integrity.sql
+ì2026-09-12 20:30:52.176 [DefaultDispatcher-worker-1 @call-context#2] INFO  c.ingames.database.DatabaseFactory - Applied migration: 005_indexes.sql
+}2026-09-12 20:30:52.327 [DefaultDispatcher-worker-1 @call-context#2] INFO  ktor.test - Application started in 0.655 seconds.
+ú2026-09-12 20:30:52.328 [DefaultDispatcher-worker-1 @call-context#2] INFO  ktor.test - Application started: io.ktor.server.application.Application@3965f0b3
+v2026-09-12 20:30:52.329 [DefaultDispatcher-worker-4 @coroutine#4] INFO  ktor.test - Responding at http://localhost:80
+x2026-09-12 20:30:52.329 [DefaultDispatcher-worker-4 @coroutine#4] INFO  ktor.test - Responding at https://localhost:443

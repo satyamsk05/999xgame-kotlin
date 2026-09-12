@@ -50,7 +50,8 @@ fun TopHeader(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 14.dp, vertical = 2.dp),
+            .offset(y = (-16).dp)
+            .padding(horizontal = 14.dp, vertical = 1.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -59,10 +60,10 @@ fun TopHeader(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.clickable { onProfileClick() }
         ) {
-            // Circular Avatar with Gold Glow Border
+            // Circular Avatar with Gold Glow Border (60dp - 10% larger)
             Box(
                 modifier = Modifier
-                    .size(50.dp)
+                    .size(60.dp)
                     .clip(CircleShape)
                     .background(Color(0xFF200038))
                     .border(2.dp, Color(0xFFFFD700), CircleShape),
@@ -89,27 +90,29 @@ fun TopHeader(
                     letterSpacing = 0.2.sp
                 )
                 Spacer(modifier = Modifier.height(2.dp))
-                // Profile Pill Button
+                // Profile Pill Button (Corner Radius 8dp, Height reduced by 20%)
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
+                        .height(18.dp)
+                        .clip(RoundedCornerShape(8.dp))
                         .background(Color(0xFF2A0E4E))
-                        .border(1.dp, Color(0xFF4C1D95), RoundedCornerShape(12.dp))
+                        .border(1.dp, Color(0xFF4C1D95), RoundedCornerShape(8.dp))
                         .clickable { onProfileClick() }
-                        .padding(horizontal = 10.dp, vertical = 2.dp)
+                        .padding(horizontal = 8.dp, vertical = 0.dp),
+                    contentAlignment = Alignment.Center
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = "Profile",
                             color = Color(0xFFFFD700),
-                            fontSize = 11.sp,
+                            fontSize = 10.5.sp,
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(modifier = Modifier.width(3.dp))
                         Text(
                             text = "▸",
                             color = Color(0xFFFFD700),
-                            fontSize = 10.sp,
+                            fontSize = 9.5.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -128,7 +131,7 @@ fun TopHeader(
                     )
                 )
                 .clickable { onAddCashClick() }
-                .padding(horizontal = 14.dp, vertical = 8.dp)
+                .padding(horizontal = 14.dp, vertical = 9.dp)
         ) {
             AsyncImage(
                 model = "file:///android_asset/nav_icon/wallet.svg",

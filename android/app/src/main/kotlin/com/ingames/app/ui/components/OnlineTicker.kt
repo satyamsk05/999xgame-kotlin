@@ -44,8 +44,18 @@ fun OnlineTicker(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color(0xFF200038))
-                .padding(vertical = 6.dp),
+                .background(
+                    androidx.compose.ui.graphics.Brush.horizontalGradient(
+                        colorStops = arrayOf(
+                            0.0f to Color(0xFF15001F),
+                            0.2f to Color(0xFF220138),
+                            0.5f to Color(0xFF2B044A),
+                            0.8f to Color(0xFF220138),
+                            1.0f to Color(0xFF15001F)
+                        )
+                    )
+                )
+                .padding(vertical = 8.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {

@@ -90,13 +90,13 @@ class SevenUpDownEngine(
 
         // 4. SETTLING
         status = RoundStatus.SETTLING
-        settleRound(total, winningArea)
+        settleRound(winningArea)
         status = RoundStatus.SETTLED
         broadcastState(remainingMs = 1000)
         delay(1000)
     }
 
-    private fun settleRound(total: Int, area: SevenUpDownBetArea) {
+    private fun settleRound(area: SevenUpDownBetArea) {
         val multiplier = if (area == SevenUpDownBetArea.SEVEN) 5.0 else 2.0
         for ((userId, bets) in activeBets) {
             for (bet in bets) {

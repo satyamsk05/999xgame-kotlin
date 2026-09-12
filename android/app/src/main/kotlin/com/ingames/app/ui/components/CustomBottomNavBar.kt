@@ -64,37 +64,36 @@ fun CustomBottomNavBar(
 
     val animatedIndex by animateFloatAsState(
         targetValue = selectedIndex.toFloat(),
-        animationSpec = tween(250, easing = FastOutSlowInEasing),
+        animationSpec = tween(180, easing = FastOutSlowInEasing),
         label = "pillSlideIndex"
     )
 
     Box(
         modifier = modifier
             .fillMaxWidth()
+            .height(65.dp)
             .background(
                 Brush.verticalGradient(
                     colors = listOf(Color(0xFF57197B), Color(0xFF15001F))
                 )
             )
-            .padding(vertical = 4.dp)
-            .navigationBarsPadding()
+            .padding(vertical = 2.dp)
     ) {
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
             val tabWidth = maxWidth / items.size
 
-            // 1. Sliding Active White Pill Indicator across tabs
+            // 1. Sliding Active White Pill Indicator across tabs (70dp x 60dp)
             Box(
                 modifier = Modifier
                     .offset(x = tabWidth * animatedIndex)
                     .width(tabWidth)
-                    .height(52.dp),
+                    .height(60.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth(0.92f)
-                        .fillMaxHeight(0.92f)
-                        .clip(RoundedCornerShape(12.dp))
+                        .size(width = 70.dp, height = 60.dp)
+                        .clip(RoundedCornerShape(14.dp))
                         .background(Color.White.copy(alpha = 0.18f))
                 )
             }
@@ -109,41 +108,16 @@ fun CustomBottomNavBar(
                     val isSelected = index == selectedIndex
                     val interactionSource = remember { MutableInteractionSource() }
 
-                    val itemAnimProgress by animateFloatAsState(
-                        targetValue = if (isSelected) 1.0f else 0.0f,
-                        animationSpec = tween(250, easing = FastOutSlowInEasing),
-                        label = "itemAnimProgress"
-                    )
-
                     val animatedTint by animateColorAsState(
                         targetValue = if (isSelected) Color.White else Color.White.copy(alpha = 0.50f),
                         animationSpec = tween(200),
                         label = "tintColor"
                     )
 
-                    val iconModifier = when (item) {
-                        NavItem.HOME -> Modifier.graphicsLayer {
-                            scaleX = 1.0f + (itemAnimProgress * 0.15f)
-                            scaleY = 1.0f + (itemAnimProgress * 0.08f)
-                        }
-                        NavItem.SHARE -> Modifier.graphicsLayer {
-                            translationX = itemAnimProgress * 4.0f
-                            translationY = -itemAnimProgress * 4.0f
-                        }
-                        NavItem.ADD_CASH, NavItem.WALLET -> Modifier.graphicsLayer {
-                            translationX = itemAnimProgress * 2.5f
-                            scaleX = 1.0f + (itemAnimProgress * 0.12f)
-                            scaleY = 1.0f + (itemAnimProgress * 0.12f)
-                        }
-                        NavItem.PROFILE -> Modifier.graphicsLayer {
-                            translationY = -itemAnimProgress * 3.5f
-                        }
-                    }
-
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .height(52.dp)
+                            .height(60.dp)
                             .clickable(
                                 interactionSource = interactionSource,
                                 indication = null
@@ -159,12 +133,10 @@ fun CustomBottomNavBar(
                                 imageLoader = svgImageLoader,
                                 contentDescription = item.title,
                                 colorFilter = ColorFilter.tint(animatedTint),
-                                modifier = Modifier
-                                    .size(26.dp)
-                                    .then(iconModifier)
+                                modifier = Modifier.size(30.dp)
                             )
 
-                            Spacer(modifier = Modifier.height(3.dp))
+                            Spacer(modifier = Modifier.height(0.5.dp))
 
                             Text(
                                 text = item.title,

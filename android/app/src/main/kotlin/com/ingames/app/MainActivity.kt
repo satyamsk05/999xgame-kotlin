@@ -21,6 +21,9 @@ import com.ingames.app.ui.theme.InGamesTheme
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
+
 enum class Screen {
     HOME,
     WALLET,
@@ -46,14 +49,13 @@ class MainActivity : ComponentActivity() {
         window.navigationBarColor = android.graphics.Color.parseColor("#15001F")
         WindowCompat.setDecorFitsSystemWindows(window, false)
         val controller = WindowInsetsControllerCompat(window, window.decorView)
-        controller.hide(WindowInsetsCompat.Type.systemBars())
+        controller.isAppearanceLightStatusBars = false
+        controller.hide(WindowInsetsCompat.Type.navigationBars())
         controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 
         setContent {
             InGamesTheme {
-                MobileDeviceFrame {
-                    MainAppContent()
-                }
+                MainAppContent()
             }
         }
     }
@@ -93,8 +95,13 @@ fun MainAppContent() {
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            when (currentScreen) {
-                Screen.HOME -> HomeScreen(
+            Crossfade(
+                targetState = currentScreen,
+                animationSpec = tween(durationMillis = 180),
+                label = "screenCrossfade"
+            ) { targetScreen ->
+                when (targetScreen) {
+                    Screen.HOME -> HomeScreen(
                     onGameClick = { game ->
                         when (game.id) {
                             "seven_up_down" -> currentScreen = Screen.GAME_SEVEN_UP_DOWN
@@ -215,4 +222,5 @@ fun MainAppContent() {
             }
         }
     }
+}
 }
