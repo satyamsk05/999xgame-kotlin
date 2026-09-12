@@ -8,7 +8,7 @@
 
 ## Active Milestone: v1.2 Advanced Admin Analytics & Risk Scoring
 
-- [ ] **Phase 8: Advanced Admin Analytics & Risk Scoring**
+- [x] **Phase 8: Advanced Admin Analytics & Risk Scoring**
   - Implement `RiskScoringService` evaluating deposit velocity, withdrawal frequency, and multi-account indicators.
   - Implement automated `RISK_LOCKED` withdrawal state logic for high-risk users.
   - Implement `/api/admin/analytics/summary` REST endpoints for GGR, NGR, and active user metrics.
