@@ -19,26 +19,25 @@ chmod +x ./gradlew
 
 # 3. Create Systemd Service for Production
 echo "Setting up systemd service (ingames-backend)..."
-SERVICE_FILE="/etc/systemd/system/ingames-backend.service"
 
-sudo bash -c "cat <<EOF > $SERVICE_FILE
+cat <<EOF | sudo tee /etc/systemd/system/ingames-backend.service > /dev/null
 [Unit]
 Description=999x Game Ktor Backend Service
 After=network.target
 
 [Service]
 User=$USER
-WorkingDirectory=$(pwd)
-ExecStart=/usr/bin/java -jar $(pwd)/backend/build/libs/backend-all.jar
+WorkingDirectory=$PWD
+ExecStart=/usr/bin/java -jar $PWD/backend/build/libs/backend-all.jar
 Restart=always
 RestartSec=10
-EnvironmentFile=$(pwd)/.env
+EnvironmentFile=$PWD/.env
 StandardOutput=journal
 StandardError=journal
 
 [Install]
 WantedBy=multi-user.target
-EOF"
+EOF
 
 # 4. Enable & Restart Service
 sudo systemctl daemon-reload

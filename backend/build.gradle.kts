@@ -56,5 +56,7 @@ tasks.register<Jar>("buildFatJar") {
     }
     val dependencies = configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) }
     from(dependencies)
-    with(tasks.named<Jar>("jar").get())
+    from(sourceSets.main.get().output)
+    from(project(":shared").sourceSets.main.get().output)
+    from(project(":admin").sourceSets.main.get().output)
 }
