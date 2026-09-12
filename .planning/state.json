@@ -1,43 +1,12 @@
 {
   "contract": "1.0.0",
   "flavor": "core",
-  "milestone": "v1.1",
-  "phases": [
-    {
-      "number": "1",
-      "name": "Persistence & Database Initialization",
-      "status": "complete"
-    },
-    {
-      "number": "2",
-      "name": "Financial Ledger & Wallet Subsystem",
-      "status": "complete"
-    },
-    {
-      "number": "3",
-      "name": "Base Game Engines Implementation",
-      "status": "complete"
-    },
-    {
-      "number": "4",
-      "name": "Realtime Gateway & WebSockets Integration",
-      "status": "complete"
-    },
-    {
-      "number": "5",
-      "name": "Admin Panel & Governance APIs",
-      "status": "complete"
-    },
-    {
-      "number": "6",
-      "name": "Android App Integration & End-to-End Verification",
-      "status": "complete"
-    }
-  ],
+  "milestone": "v1.1 — UI Polish & Live Streaming Enhancements",
+  "phases": [],
   "next": {
-    "command": "/gsd-discuss-phase",
-    "label": "Discuss the first phase",
-    "reason": "Project initialized — plan your first phase"
+    "command": "/gsd-progress",
+    "label": "Show progress",
+    "reason": "Unsure of state — showing progress"
   },
-  "updated_at": "2026-09-12T10:58:28.383Z"
+  "updated_at": "2026-09-12T11:02:15.964Z"
 }
