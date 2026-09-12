@@ -25,6 +25,9 @@ import java.util.UUID
 
 fun Application.configureRoutes(gameManager: GameManager, wsHub: WebSocketHub) {
     routing {
+        get("/admin") {
+            call.respondRedirect("/admin.html")
+        }
         adminRoutes()
 
         // --- PUBLIC & PROBES ---
