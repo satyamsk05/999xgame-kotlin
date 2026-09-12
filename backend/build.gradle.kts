@@ -51,14 +51,38 @@ tasks.test {
 tasks.register<Jar>("buildFatJar") {
     archiveFileName.set("backend-all.jar")
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    // Strip Java signature metadata from dependency JARs.
+    // These signatures become invalid after dependencies are merged into one fat JAR.
     exclude("META-INF/*.SF")
     exclude("META-INF/*.RSA")
     exclude("META-INF/*.DSA")
+    exclude("META-INF/*.EC")
+    exclude("META-INF/*.SIG")
+
     manifest {
         attributes["Main-Class"] = "com.ingames.ApplicationKt"
     }
-    val dependencies = configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) }
-    from(dependencies)
+
+    val dependencies = configurations.runtimeClasspath.get().map {
+        if (it.isDirectory) it else zipTree(it)
+    }
+
+    from(dependencies) {
+        eachFile {
+            val upperName = name.uppercase()
+            val upperPath = relativePath.pathString.uppercase()
+            if (upperPath.startsWith("META-INF/") &&
+                (upperName.endsWith(".SF") ||
+                 upperName.endsWith(".RSA") ||
+                 upperName.endsWith(".DSA") ||
+                 upperName.endsWith(".EC") ||
+                 upperName.endsWith(".SIG"))) {
+                exclude()
+            }
+        }
+    }
+
     from(sourceSets.main.get().output)
     from(project(":shared").sourceSets.main.get().output)
     from(project(":admin").sourceSets.main.get().output)
