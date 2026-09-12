@@ -51,6 +51,9 @@ tasks.test {
 tasks.register<Jar>("buildFatJar") {
     archiveFileName.set("backend-all.jar")
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    exclude("META-INF/*.SF")
+    exclude("META-INF/*.RSA")
+    exclude("META-INF/*.DSA")
     manifest {
         attributes["Main-Class"] = "com.ingames.ApplicationKt"
     }
