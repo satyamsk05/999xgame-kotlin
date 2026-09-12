@@ -1,12 +1,11 @@
+@file:OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class, kotlinx.coroutines.DelicateCoroutinesApi::class)
 package com.ingames.websocket
 
 import io.ktor.websocket.*
-import kotlinx.coroutines.DelicateCoroutinesApi
 import org.slf4j.LoggerFactory
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArraySet
 
-@OptIn(DelicateCoroutinesApi::class)
 class WebSocketHub {
     private val logger = LoggerFactory.getLogger(WebSocketHub::class.java)
 

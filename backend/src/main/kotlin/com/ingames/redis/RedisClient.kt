@@ -1,6 +1,6 @@
+@file:Suppress("UNUSED_PARAMETER")
 package com.ingames.redis
 
-@Suppress("UNUSED_PARAMETER")
 class RedisClient {
     fun connect() {}
     fun get(key: String): String? = null

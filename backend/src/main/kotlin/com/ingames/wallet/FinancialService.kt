@@ -1,3 +1,4 @@
+@file:Suppress("UNUSED_PARAMETER")
 package com.ingames.wallet
 
 import com.ingames.database.DatabaseFactory
