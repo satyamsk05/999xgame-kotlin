@@ -4,6 +4,15 @@
 
 - ✅ **v1.0 Production Core Architecture & Game Foundation** — Phases 1-6 (shipped 2026-09-12)
 - ✅ **v1.1 UI Polish & Live Streaming Enhancements** — Phase 7 (shipped 2026-09-12)
+- 🚧 **v1.2 Advanced Admin Analytics & Risk Scoring** — Phase 8 (in progress)
+
+## Active Milestone: v1.2 Advanced Admin Analytics & Risk Scoring
+
+- [ ] **Phase 8: Advanced Admin Analytics & Risk Scoring**
+  - Implement `RiskScoringService` evaluating deposit velocity, withdrawal frequency, and multi-account indicators.
+  - Implement automated `RISK_LOCKED` withdrawal state logic for high-risk users.
+  - Implement `/api/admin/analytics/summary` REST endpoints for GGR, NGR, and active user metrics.
+  - Build risk override & user restriction admin controller endpoints with audit logging.
 
 ## Completed Milestones
 

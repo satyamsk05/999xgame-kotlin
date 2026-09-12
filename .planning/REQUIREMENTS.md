@@ -1,22 +1,18 @@
-# Requirements Specifications (`999xgame-kotlin` — Milestone v1.1)
+# Requirements Specifications (`999xgame-kotlin` — Milestone v1.2)
 
 ## User Stories & Acceptance Criteria
 
-### 1. UI Loading & Skeleton States
-- **UIPOLISH-01**: As a user, I want smooth animated shimmer loading placeholders on the Home screen while game data is loading from backend REST APIs.
-  - *Acceptance Criteria*: `HomeScreen` displays shimmer skeleton cards until `ApiClient.fetchGames()` completes.
+### 1. User Risk Scoring & Automated Lock Subsystem
+- **RISK-01**: As an administrator, I want automated user risk scoring based on deposit frequency, withdrawal velocity, and bet patterns so that high-risk fraud is flagged.
+  - *Acceptance Criteria*: `RiskScoringService` evaluates user risk index (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`) and logs triggers.
+- **RISK-02**: As a compliance officer, I want high-risk withdrawal requests automatically flagged and locked for manual admin review.
+  - *Acceptance Criteria*: `WithdrawalService` checks user risk tier and marks requests as `RISK_LOCKED` if risk score > 80.
 
-### 2. Live WebSocket Resilience & User Notifications
-- **UIPOLISH-02**: As a user, I want an automatic reconnection banner and toast when the WebSocket connection drops during backgrounding or network changes.
-  - *Acceptance Criteria*: `RealtimeClient` detects disconnect events, triggers exponential backoff retry, and displays an unobtrusive reconnection bar.
-
-### 3. Tactile Haptics & Feedback
-- **UIPOLISH-03**: As a player, I want tactile haptic feedback when placing bets or executing cashouts.
-  - *Acceptance Criteria*: Jetpack Compose bet buttons emit `HapticFeedbackType.LongPress` or `TextHandleMove` feedback on click.
-
-### 4. Live Round & Payout Overlays
-- **UIPOLISH-04**: As a player, I want animated win celebration overlays and live countdown tickers in active game screens.
-  - *Acceptance Criteria*: Winning round WebSocket messages trigger overlay celebration animations on Seven Up Down, Crush, and Dragon Tiger screens.
+### 2. Platform Analytics & Risk Controller
+- **ANALYTICS-01**: As an admin, I want real-time platform analytics endpoints for GGR, NGR, daily active users, and net deposit volume.
+  - *Acceptance Criteria*: `GET /api/admin/analytics/summary` returns structured revenue and user activity metrics.
+- **ANALYTICS-02**: As an admin, I want risk management controls to override user risk scores, flag suspicious accounts, or restrict betting limits.
+  - *Acceptance Criteria*: `POST /api/admin/users/risk-action` executes risk overrides and logs all changes in `audit_logs`.
 
 ---
 
@@ -24,13 +20,13 @@
 
 | Requirement ID | Assigned Phase | Status |
 |---|:---:|:---:|
-| **UIPOLISH-01** | Phase 7 | `[ ]` |
-| **UIPOLISH-02** | Phase 7 | `[ ]` |
-| **UIPOLISH-03** | Phase 7 | `[ ]` |
-| **UIPOLISH-04** | Phase 7 | `[ ]` |
+| **RISK-01** | Phase 8 | `[ ]` |
+| **RISK-02** | Phase 8 | `[ ]` |
+| **ANALYTICS-01** | Phase 8 | `[ ]` |
+| **ANALYTICS-02** | Phase 8 | `[ ]` |
 
 ---
 
 ## Definition of Done
-- `./gradlew check` passes cleanly across `:android:app` and backend modules.
-- Android unit tests verify `RealtimeClient` reconnection flow and `HomeScreen` UI composables.
+- All backend admin unit & integration tests pass (`./gradlew :backend:test`).
+- `./gradlew check` succeeds cleanly across all 5 workspace modules.
