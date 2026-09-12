@@ -46,11 +46,12 @@ object LogginSessionStore {
         return session
     }
 
+    @Synchronized
     fun markVerified(token: String, phone: String) {
         val session = sessions[token] ?: return
         if (session.status == LogginSessionStatus.PENDING && !session.isExpired()) {
-            session.status = LogginSessionStatus.VERIFIED
             session.verifiedPhone = phone
+            session.status = LogginSessionStatus.VERIFIED
         }
     }
 

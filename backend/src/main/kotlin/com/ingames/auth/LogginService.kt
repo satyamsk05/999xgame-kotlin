@@ -36,32 +36,47 @@ object LogginService {
      */
     fun createToken(): LogginCreateTokenResponse {
         val appKey = config.logginAppKey
-        val token = "lgn_tok_" + UUID.randomUUID().toString().replace("-", "")
+        var finalToken = "lgn_tok_" + UUID.randomUUID().toString().replace("-", "")
+        var finalVerificationUrl = "https://loggin.dev/verify/$finalToken"
 
         if (appKey.isNotBlank()) {
-            try {
-                val reqBody = """{"appKey":"$appKey","token":"$token"}"""
-                val request = HttpRequest.newBuilder()
-                    .uri(URI.create("${config.logginApiUrl}/auth/token"))
-                    .header("Content-Type", "application/json")
-                    .header("X-Loggin-App-Key", appKey)
-                    .POST(HttpRequest.BodyPublishers.ofString(reqBody))
-                    .timeout(Duration.ofSeconds(5))
-                    .build()
+            val reqBody = """{"appKey":"$appKey","token":"$finalToken"}"""
+            val request = HttpRequest.newBuilder()
+                .uri(URI.create("${config.logginApiUrl}/auth/token"))
+                .header("Content-Type", "application/json")
+                .header("X-Loggin-App-Key", appKey)
+                .POST(HttpRequest.BodyPublishers.ofString(reqBody))
+                .timeout(Duration.ofSeconds(5))
+                .build()
 
+            try {
                 val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
                 if (response.statusCode() in 200..299) {
                     logger.info("Successfully created Loggin.dev token from remote service")
+                    val body = response.body()
+                    val tokenMatch = "\"token\"\\s*:\\s*\"([^\"]+)\"".toRegex().find(body)
+                    if (tokenMatch != null) {
+                        finalToken = tokenMatch.groupValues[1]
+                    }
+                    val urlMatch = "\"verificationUrl\"\\s*:\\s*\"([^\"]+)\"".toRegex().find(body)
+                        ?: "\"link\"\\s*:\\s*\"([^\"]+)\"".toRegex().find(body)
+                    if (urlMatch != null) {
+                        finalVerificationUrl = urlMatch.groupValues[1]
+                    } else {
+                        finalVerificationUrl = "https://loggin.dev/verify/$finalToken"
+                    }
                 } else {
                     logger.warn("Loggin.dev API returned HTTP {}: {}", response.statusCode(), response.body())
+                    throw IllegalStateException("Loggin provider API error: HTTP ${response.statusCode()}")
                 }
             } catch (e: Exception) {
-                logger.warn("Loggin.dev remote request notice: {}. Using generated session token.", e.message)
+                if (e is IllegalStateException) throw e
+                logger.warn("Loggin.dev remote request exception: {}", e.message)
+                throw IllegalStateException("Failed to communicate with Loggin provider: ${e.message}")
             }
         }
 
-        val verificationUrl = "https://loggin.dev/verify/$token"
-        val session = LogginSessionStore.createSession(token, verificationUrl)
+        val session = LogginSessionStore.createSession(finalToken, finalVerificationUrl)
 
         return LogginCreateTokenResponse(
             token = session.token,
@@ -109,9 +124,22 @@ object LogginService {
                     .build()
 
                 val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
-                if (response.statusCode() == 200 && response.body().contains("verified")) {
-                    // Simple parse if body contains verified status and phone
-                    // Mark local session verified
+                if (response.statusCode() == 200) {
+                    val body = response.body()
+                    val isVerified = body.contains("\"status\":\"verified\"", ignoreCase = true) ||
+                            body.contains("\"status\":\"VERIFIED\"", ignoreCase = true) ||
+                            body.contains("\"verified\":true", ignoreCase = true)
+                    val phoneMatch = "\"phone\"\\s*:\\s*\"([^\"]+)\"".toRegex().find(body)
+                        ?: "\"verifiedPhone\"\\s*:\\s*\"([^\"]+)\"".toRegex().find(body)
+
+                    if (isVerified && phoneMatch != null) {
+                        val phone = phoneMatch.groupValues[1]
+                        LogginSessionStore.markVerified(token, phone)
+                        return LogginStatusResponse(
+                            status = LogginSessionStatus.VERIFIED,
+                            verifiedPhone = phone
+                        )
+                    }
                 }
             } catch (e: Exception) {
                 logger.debug("Remote Loggin status check exception: {}", e.message)

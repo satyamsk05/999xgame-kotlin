@@ -95,8 +95,10 @@ class FinancialServiceTest {
     fun `test simultaneous dual financial requests result in exactly one debit`() {
         val idempotencyKey = "same_financial_request_123"
         val executor = Executors.newFixedThreadPool(2)
+        val startLatch = java.util.concurrent.CountDownLatch(1)
 
-        val task1 = Runnable {
+        val task1 = java.util.concurrent.Callable {
+            startLatch.await()
             FinancialService.debitForBet(
                 userId = testUserId,
                 amountPaise = 10000L, // ₹100
@@ -106,7 +108,8 @@ class FinancialServiceTest {
             )
         }
 
-        val task2 = Runnable {
+        val task2 = java.util.concurrent.Callable {
+            startLatch.await()
             FinancialService.debitForBet(
                 userId = testUserId,
                 amountPaise = 10000L, // ₹100
@@ -116,8 +119,16 @@ class FinancialServiceTest {
             )
         }
 
-        executor.submit(task1)
-        executor.submit(task2)
+        val future1 = executor.submit(task1)
+        val future2 = executor.submit(task2)
+        startLatch.countDown()
+
+        val res1 = future1.get(5, TimeUnit.SECONDS)
+        val res2 = future2.get(5, TimeUnit.SECONDS)
+
+        assertTrue(res1.isSuccess)
+        assertTrue(res2.isSuccess)
+
         executor.shutdown()
         executor.awaitTermination(5, TimeUnit.SECONDS)
 

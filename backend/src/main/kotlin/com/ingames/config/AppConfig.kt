@@ -15,8 +15,10 @@ data class AppConfig(
     val dbPoolSize: Int = System.getenv("DB_POOL_SIZE")?.toIntOrNull() ?: 10,
 
     // JWT Security
-    val jwtSecret: String = System.getenv("JWT_SECRET") ?: "999xgame_super_secret_jwt_signing_key_32bytes",
-    val adminJwtSecret: String = System.getenv("ADMIN_JWT_SECRET") ?: "999xgame_admin_jwt_secret_signing_key_32bytes",
+    val jwtSecret: String = System.getenv("JWT_SECRET")
+        ?: if (environment == "development") "999xgame_super_secret_jwt_signing_key_32bytes" else error("JWT_SECRET environment variable is required"),
+    val adminJwtSecret: String = System.getenv("ADMIN_JWT_SECRET")
+        ?: if (environment == "development") "999xgame_admin_jwt_secret_signing_key_32bytes" else error("ADMIN_JWT_SECRET environment variable is required"),
     val jwtIssuer: String = System.getenv("JWT_ISSUER") ?: "ingames-backend",
     val jwtAudience: String = System.getenv("JWT_AUDIENCE") ?: "ingames-client",
     val jwtExpirationMs: Long = (System.getenv("JWT_EXPIRATION_SECONDS")?.toLongOrNull() ?: (30L * 24 * 60 * 60)) * 1000L,

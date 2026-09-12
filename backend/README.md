@@ -35,7 +35,7 @@ cp .env.example .env
 | -------- | -------- | ------- | --------------------- |
 | `LOGGIN_APP_KEY` | Optional in dev / Required in prod | OTP-less WhatsApp auth key | [Loggin.dev Dashboard](https://loggin.dev) |
 | `LOGGIN_API_URL` | Optional | Loggin.dev API base URL | Default `https://api.loggin.dev/v1` |
-| `DATABASE_URL` / `DB_HOST` | Required for PostgreSQL | Database connection | PostgreSQL instance |
+| `DB_HOST` | Required for PostgreSQL | Database host connection | PostgreSQL instance |
 | `DB_NAME`, `DB_USER`, `DB_PASSWORD` | Required for PostgreSQL | Database credentials | PostgreSQL instance |
 | `REDIS_HOST`, `REDIS_PORT` | Optional | Session & Cache store | Redis instance |
 | `JWT_SECRET` | Required in prod | Application JWT signing | Cryptographic random 32-byte secret |

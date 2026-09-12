@@ -64,7 +64,11 @@ class ApiRoutesTest {
         assertTrue(statusRes1.bodyAsText().contains("PENDING"))
 
         // 3. Mark session verified (simulating WhatsApp verification webhook)
-        LogginSessionStore.markVerified(token, "9876543210")
+        val callbackRes = client.post("/api/auth/loggin/callback") {
+            contentType(ContentType.Application.Json)
+            setBody("""{"token":"$token","phone":"9876543210"}""")
+        }
+        assertEquals(HttpStatusCode.OK, callbackRes.status)
 
         // 4. Verify & Obtain Application JWT
         val verifyRes = client.post("/api/auth/loggin/verify") {
@@ -73,7 +77,9 @@ class ApiRoutesTest {
         }
         assertEquals(HttpStatusCode.OK, verifyRes.status)
         val verifyBody = verifyRes.bodyAsText()
-        assertTrue(verifyBody.contains("VERIFIED"))
-        assertTrue(verifyBody.contains("9876543210"))
+        val verifyResponse = testJson.decodeFromString<ApiResponse<com.ingames.auth.LogginVerifyResponse>>(verifyBody)
+        assertNotNull(verifyResponse.data)
+        assertNotNull(verifyResponse.data!!.token)
+        assertEquals("9876543210", verifyResponse.data!!.user?.phone)
     }
 }

@@ -80,12 +80,20 @@ fun Route.authRoutes() {
             try {
                 val params = call.receive<Map<String, String>>()
                 val token = params["token"]
-                val phone = params["phone"]
-                if (!token.isNullOrEmpty() && !phone.isNullOrEmpty()) {
-                    LogginSessionStore.markVerified(token, phone)
+                val callerPhone = params["phone"]
+                if (token.isNullOrEmpty()) {
+                    call.respond(HttpStatusCode.BadRequest, ApiResponse<Unit>(status = "error", message = "Missing token"))
+                    return@post
+                }
+                
+                val statusRes = LogginService.checkStatus(token)
+                val verifiedPhone = statusRes.verifiedPhone ?: callerPhone
+
+                if (!verifiedPhone.isNullOrEmpty()) {
+                    LogginSessionStore.markVerified(token, verifiedPhone)
                     call.respond(HttpStatusCode.OK, ApiResponse<Unit>(status = "success", message = "Verified successfully"))
                 } else {
-                    call.respond(HttpStatusCode.BadRequest, ApiResponse<Unit>(status = "error", message = "Missing token or phone"))
+                    call.respond(HttpStatusCode.BadRequest, ApiResponse<Unit>(status = "error", message = "Invalid token or missing verified phone"))
                 }
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.InternalServerError, ApiResponse<Unit>(status = "error", message = e.message))
