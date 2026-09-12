@@ -1,28 +1,36 @@
-# Requirements Specifications (`999xgame-kotlin`)
+# Requirements Specifications (`999xgame-kotlin` — Milestone v1.1)
 
 ## User Stories & Acceptance Criteria
 
-### 1. Database & Persistence Layer
-- **US-01**: As a developer, I want PostgreSQL DDL and Flyway migrations applied so that database tables (users, wallets, transactions, games, rounds, bets) exist and accept connections.
-  - *Acceptance Criteria*: Database connection pool initializes via HikariCP and schema tables pass migration checks.
+### 1. UI Loading & Skeleton States
+- **UIPOLISH-01**: As a user, I want smooth animated shimmer loading placeholders on the Home screen while game data is loading from backend REST APIs.
+  - *Acceptance Criteria*: `HomeScreen` displays shimmer skeleton cards until `ApiClient.fetchGames()` completes.
 
-### 2. Financial Ledger & Wallet Subsystem
-- **US-02**: As a user, I want deposit and withdrawal requests processed through an audited ledger balance system so that my wallet balance is traceable.
-  - *Acceptance Criteria*: All balance updates generate `Transaction` entries with valid `balanceAfter` calculation.
+### 2. Live WebSocket Resilience & User Notifications
+- **UIPOLISH-02**: As a user, I want an automatic reconnection banner and toast when the WebSocket connection drops during backgrounding or network changes.
+  - *Acceptance Criteria*: `RealtimeClient` detects disconnect events, triggers exponential backoff retry, and displays an unobtrusive reconnection bar.
 
-### 3. Base Game Engines
-- **US-03**: As a player, I want to play Coin Flip, Classic Dice, Keno, Mines, Perya Color Game, Ring of Fortune, Double, and Limbo with provably fair server seeds.
-  - *Acceptance Criteria*: Game engines generate server seeds, SHA-256 hashes, and evaluate payouts accurately.
+### 3. Tactile Haptics & Feedback
+- **UIPOLISH-03**: As a player, I want tactile haptic feedback when placing bets or executing cashouts.
+  - *Acceptance Criteria*: Jetpack Compose bet buttons emit `HapticFeedbackType.LongPress` or `TextHandleMove` feedback on click.
 
-### 4. Realtime Gateway & WebSocket Communication
-- **US-04**: As a player, I want live round updates, betting timers, and outcome notifications delivered via WebSockets.
-  - *Acceptance Criteria*: Android app receives real-time JSON events for active rounds and balance changes.
+### 4. Live Round & Payout Overlays
+- **UIPOLISH-04**: As a player, I want animated win celebration overlays and live countdown tickers in active game screens.
+  - *Acceptance Criteria*: Winning round WebSocket messages trigger overlay celebration animations on Seven Up Down, Crush, and Dragon Tiger screens.
 
-### 5. Admin Panel Governance
-- **US-05**: As an administrator, I want to review withdrawal requests, configure game bet limits, and monitor platform analytics.
-  - *Acceptance Criteria*: Admin endpoints respond to role-based authenticated requests and log all admin actions in `audit_logs`.
+---
+
+## Requirement Traceability
+
+| Requirement ID | Assigned Phase | Status |
+|---|:---:|:---:|
+| **UIPOLISH-01** | Phase 7 | `[ ]` |
+| **UIPOLISH-02** | Phase 7 | `[ ]` |
+| **UIPOLISH-03** | Phase 7 | `[ ]` |
+| **UIPOLISH-04** | Phase 7 | `[ ]` |
+
+---
 
 ## Definition of Done
-- All modules compile cleanly (`./gradlew check`).
-- Unit test suites pass for all game engines.
-- REST & WebSocket APIs respond within specified SLA (<100ms for balance checks).
+- `./gradlew check` passes cleanly across `:android:app` and backend modules.
+- Android unit tests verify `RealtimeClient` reconnection flow and `HomeScreen` UI composables.
