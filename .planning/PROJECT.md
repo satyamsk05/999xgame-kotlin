@@ -1,10 +1,10 @@
 # Project Specification: 999xgame-kotlin
 
 ## What This Is
-A multi-module Kotlin casino and gaming backend with real-time WebSockets, integer-paise financial ledger, 8 provably fair game engines, role-based admin panel, and Jetpack Compose Android app integration with live streaming enhancements.
+A multi-module Kotlin casino and gaming backend with real-time WebSockets, integer-paise financial ledger, 8 provably fair game engines, role-based admin panel, Jetpack Compose Android app integration with live streaming enhancements, and automated risk scoring / analytics governance.
 
 ## Core Value
-Provably fair, low-latency gaming architecture built on double-entry financial ledger principles, resilient live streaming WebSockets, and robust Kotlin multi-module standards.
+Provably fair, low-latency gaming architecture built on double-entry financial ledger principles, resilient live streaming WebSockets, automated risk management, and robust Kotlin multi-module standards.
 
 ## Requirements
 
@@ -18,9 +18,13 @@ Provably fair, low-latency gaming architecture built on double-entry financial l
 - ✓ Shimmer Loading Skeletons & Compose UI Polish — v1.1
 - ✓ Realtime Client Exponential Backoff Reconnection Resilience — v1.1
 - ✓ Tactile Haptic Feedback & Win Visual Overlays — v1.1
+- ✓ User Risk Scoring Engine (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`) — v1.2
+- ✓ Automated Risk-Flagged Withdrawal Locking (`RISK_LOCKED`) — v1.2
+- ✓ Platform Analytics Summary Endpoints (GGR, NGR, DAU, Net Deposit Volume) — v1.2
+- ✓ Admin Risk Management Controller & Audit Logging — v1.2
 
 ### Active
-- [ ] Next Milestone Features (Multi-currency support, Advanced Analytics, Risk Scoring)
+- [ ] Next Milestone Features (Multi-currency support, VIP Loyalty Tier Engine, Custom Private Tables)
 
 ### Out of Scope
 - Microservices refactoring — monorepo Gradle multi-module approach is sufficient for current scale.
@@ -32,6 +36,7 @@ Provably fair, low-latency gaming architecture built on double-entry financial l
 | Provably Fair SHA-256 Engine | Enables client-side result verification | ✓ Good |
 | Double-Entry Wallet Ledger | Ensures immutable audit trail for all balance mutations | ✓ Good |
 | Exponential Backoff WebSockets | Guarantees automatic reconnection on network drops | ✓ Good |
+| Automated Risk Scoring & Locking | Prevents instant fraudulent withdrawal payouts | ✓ Good |
 
 ---
-*Last updated: 2026-09-12 after v1.1 milestone completion*
+*Last updated: 2026-09-12 after v1.2 milestone completion*
