@@ -1,5 +1,6 @@
 package com.ingames
 
+import com.ingames.auth.LogginSessionStore
 import com.ingames.models.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -40,19 +41,39 @@ class ApiRoutesTest {
     }
 
     @Test
-    fun `test auth otp verify returns JWT and user profile`() = testApplication {
+    fun `test loggin OTP-less auth workflow endpoints`() = testApplication {
         application {
             module()
         }
-        val verifyRes = client.post("/api/auth/otp/verify") {
+
+        // 1. Create Token
+        val createRes = client.post("/api/auth/loggin/create-token")
+        assertEquals(HttpStatusCode.OK, createRes.status)
+        val createBody = createRes.bodyAsText()
+        assertTrue(createBody.contains("verificationUrl"))
+        assertTrue(createBody.contains("token"))
+
+        val createData = testJson.decodeFromString<ApiResponse<com.ingames.auth.LogginTokenResponse>>(createBody).data
+        assertNotNull(createData)
+        val token = createData!!.token!!
+        assertNotNull(token)
+
+        // 2. Status Check (PENDING)
+        val statusRes1 = client.get("/api/auth/loggin/status/$token")
+        assertEquals(HttpStatusCode.OK, statusRes1.status)
+        assertTrue(statusRes1.bodyAsText().contains("PENDING"))
+
+        // 3. Mark session verified (simulating WhatsApp verification webhook)
+        LogginSessionStore.markVerified(token, "9876543210")
+
+        // 4. Verify & Obtain Application JWT
+        val verifyRes = client.post("/api/auth/loggin/verify") {
             contentType(ContentType.Application.Json)
-            setBody(testJson.encodeToString(VerifyOtpRequest.serializer(), VerifyOtpRequest(phone = "9876543210", otp = "123456")))
+            setBody("""{"token":"$token"}""")
         }
         assertEquals(HttpStatusCode.OK, verifyRes.status)
-        val bodyText = verifyRes.bodyAsText()
-        val auth = testJson.decodeFromString<ApiResponse<AuthResponse>>(bodyText)
-        assertEquals("success", auth.status)
-        assertNotNull(auth.data?.token)
-        assertEquals("9876543210", auth.data?.user?.phone)
+        val verifyBody = verifyRes.bodyAsText()
+        assertTrue(verifyBody.contains("VERIFIED"))
+        assertTrue(verifyBody.contains("9876543210"))
     }
 }

@@ -22,3 +22,5 @@ out/
 *.apk
 *.dex
 
+.env
+*.env

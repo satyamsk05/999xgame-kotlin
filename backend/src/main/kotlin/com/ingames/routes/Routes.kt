@@ -1,6 +1,7 @@
 package com.ingames.routes
 
 import com.ingames.admin.adminRoutes
+import com.ingames.auth.authRoutes
 import com.ingames.auth.JwtService
 import com.ingames.database.DatabaseFactory
 import com.ingames.database.MemoryDataStore
@@ -86,35 +87,7 @@ fun Application.configureRoutes(gameManager: GameManager, wsHub: WebSocketHub) {
         }
 
         // --- AUTH ---
-        route("/api/auth") {
-            post("/otp/send") {
-                val req = call.receive<SendOtpRequest>()
-                call.respond(
-                    ApiResponse(
-                        data = mapOf(
-                            "phone" to req.phone,
-                            "otpSent" to true,
-                            "demoOtp" to "123456" // Standard demo OTP for rapid testing
-                        )
-                    )
-                )
-            }
-
-            post("/otp/verify") {
-                val req = call.receive<VerifyOtpRequest>()
-                val user = UserRepository.getOrCreateUserByPhone(req.phone)
-                val token = JwtService.generateUserToken(user.id, user.phone)
-                call.respond(
-                    ApiResponse(
-                        data = AuthResponse(
-                            token = token,
-                            refreshToken = "rf_" + UUID.randomUUID().toString(),
-                            user = user
-                        )
-                    )
-                )
-            }
-        }
+        authRoutes()
 
         // --- GAMES (PUBLIC READ) ---
         get("/api/games") {

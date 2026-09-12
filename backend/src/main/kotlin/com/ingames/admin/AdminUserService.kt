@@ -89,12 +89,11 @@ object AdminUserService {
             return try {
                 DatabaseFactory.withConnection { conn ->
                     val stmt = conn.prepareStatement(
-                        "UPDATE users SET is_blocked = ?, blocked_reason = ?, blocked_at = IF(?, NOW(), NULL), updated_at = NOW() WHERE id = ?"
+                        "UPDATE users SET is_blocked = ?, blocked_reason = ? WHERE id = ?"
                     )
                     stmt.setBoolean(1, block)
                     stmt.setString(2, reason)
-                    stmt.setBoolean(3, block)
-                    stmt.setString(4, userId)
+                    stmt.setString(3, userId)
                     stmt.executeUpdate() > 0
                 }
             } catch (e: Exception) {

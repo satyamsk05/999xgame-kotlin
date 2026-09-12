@@ -1,6 +1,7 @@
 package com.ingames.e2e
 
 import com.ingames.admin.AdminAuthService
+import com.ingames.auth.LogginSessionStore
 import com.ingames.models.*
 import com.ingames.module
 import io.ktor.client.request.*
@@ -27,16 +28,25 @@ class E2EIntegrationTest {
 
         val phone = "9988776655"
 
-        // 1. Auth OTP Verify
-        val verifyRes = client.post("/api/auth/otp/verify") {
+        // 1. Loggin OTP-less WhatsApp Auth Flow
+        val createTokenRes = client.post("/api/auth/loggin/create-token")
+        assertEquals(HttpStatusCode.OK, createTokenRes.status)
+        val createData = testJson.decodeFromString<ApiResponse<com.ingames.auth.LogginTokenResponse>>(createTokenRes.bodyAsText()).data
+        assertNotNull(createData)
+        val logginToken = createData!!.token!!
+
+        // Mark verified in Loggin session
+        LogginSessionStore.markVerified(logginToken, phone)
+
+        val verifyRes = client.post("/api/auth/loggin/verify") {
             contentType(ContentType.Application.Json)
-            setBody(testJson.encodeToString(VerifyOtpRequest.serializer(), VerifyOtpRequest(phone = phone, otp = "123456")))
+            setBody("""{"token":"$logginToken"}""")
         }
         assertEquals(HttpStatusCode.OK, verifyRes.status)
-        val auth = testJson.decodeFromString<ApiResponse<AuthResponse>>(verifyRes.bodyAsText()).data!!
-        val userToken = auth.token
-        val userId = auth.user.id
-        assertNotNull(userToken)
+        val verifyData = testJson.decodeFromString<ApiResponse<com.ingames.auth.LogginVerifyResponse>>(verifyRes.bodyAsText()).data
+        assertNotNull(verifyData)
+        val userToken = verifyData!!.token!!
+        val userId = verifyData.user!!.id
 
         // 2. Initiate Deposit & Submit UTR
         val depRes = client.post("/api/deposits/initiate") {
@@ -51,7 +61,7 @@ class E2EIntegrationTest {
         val utrRes = client.post("/api/deposits/submit-utr") {
             contentType(ContentType.Application.Json)
             header(HttpHeaders.Authorization, "Bearer $userToken")
-            setBody(testJson.encodeToString(SubmitUtrRequest.serializer(), SubmitUtrRequest(depositId = depositId, utr = "UTR_E2E_123456")))
+            setBody(testJson.encodeToString(SubmitUtrRequest.serializer(), SubmitUtrRequest(depositId = depositId, utr = "UTR_E2E_998877")))
         }
         assertEquals(HttpStatusCode.OK, utrRes.status)
 

@@ -1,12 +1,13 @@
 package com.ingames
 
 import com.ingames.database.MemoryDataStore
-import com.ingames.models.WalletBalance
 import com.ingames.wallet.FinancialService
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 class FinancialServiceTest {
 
@@ -88,5 +89,40 @@ class FinancialServiceTest {
         assertEquals(50000L, bal.depositPaise)
         assertEquals(40000L, bal.winningsPaise) // 200 + 200 = 400
         assertEquals(90000L, bal.totalPaise)
+    }
+
+    @Test
+    fun `test simultaneous dual financial requests result in exactly one debit`() {
+        val idempotencyKey = "same_financial_request_123"
+        val executor = Executors.newFixedThreadPool(2)
+
+        val task1 = Runnable {
+            FinancialService.debitForBet(
+                userId = testUserId,
+                amountPaise = 10000L, // ₹100
+                gameId = "seven_up_down",
+                roundId = "rnd_simultaneous",
+                idempotencyKey = idempotencyKey
+            )
+        }
+
+        val task2 = Runnable {
+            FinancialService.debitForBet(
+                userId = testUserId,
+                amountPaise = 10000L, // ₹100
+                gameId = "seven_up_down",
+                roundId = "rnd_simultaneous",
+                idempotencyKey = idempotencyKey
+            )
+        }
+
+        executor.submit(task1)
+        executor.submit(task2)
+        executor.shutdown()
+        executor.awaitTermination(5, TimeUnit.SECONDS)
+
+        val finalBal = FinancialService.getWalletBalance(testUserId)
+        // Original 70,000 - 10,000 = 60,000 paise exactly once!
+        assertEquals(60000L, finalBal.totalPaise)
     }
 }
