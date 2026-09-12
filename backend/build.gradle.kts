@@ -14,6 +14,7 @@ kotlin {
 
 dependencies {
     implementation(project(":shared"))
+    implementation(project(":admin"))
 
     // Ktor Server
     implementation(libs.ktor.server.core)

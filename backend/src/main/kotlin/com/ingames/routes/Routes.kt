@@ -1,5 +1,6 @@
 package com.ingames.routes
 
+import com.ingames.admin.adminRoutes
 import com.ingames.auth.JwtService
 import com.ingames.database.DatabaseFactory
 import com.ingames.database.MemoryDataStore
@@ -23,6 +24,8 @@ import java.util.UUID
 
 fun Application.configureRoutes(gameManager: GameManager, wsHub: WebSocketHub) {
     routing {
+        adminRoutes()
+
         // --- PUBLIC & PROBES ---
         get("/health") {
             call.respond(

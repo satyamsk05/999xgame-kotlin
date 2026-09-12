@@ -9,50 +9,54 @@ object FinancialService {
 
     fun getWalletBalance(userId: String): WalletBalance {
         if (DatabaseFactory.isConnectedToPostgres) {
-            return DatabaseFactory.withConnection { conn ->
-                val stmt = conn.prepareStatement(
-                    "SELECT deposit_balance, winnings_balance, bonus_balance, reserved_balance FROM wallets WHERE user_id = ?"
-                )
-                stmt.setString(1, userId)
-                val rs = stmt.executeQuery()
-                if (rs.next()) {
-                    val dep = rs.getLong("deposit_balance")
-                    val win = rs.getLong("winnings_balance")
-                    val bon = rs.getLong("bonus_balance")
-                    val res = rs.getLong("reserved_balance")
-                    WalletBalance(
-                        depositPaise = dep,
-                        winningsPaise = win,
-                        bonusPaise = bon,
-                        reservedPaise = res,
-                        totalPaise = dep + win + bon
+            try {
+                return DatabaseFactory.withConnection { conn ->
+                    val stmt = conn.prepareStatement(
+                        "SELECT deposit_balance, winnings_balance, bonus_balance, reserved_balance FROM wallets WHERE user_id = ?"
                     )
-                } else {
-                    WalletBalance()
+                    stmt.setString(1, userId)
+                    val rs = stmt.executeQuery()
+                    if (rs.next()) {
+                        val dep = rs.getLong("deposit_balance")
+                        val win = rs.getLong("winnings_balance")
+                        val bon = rs.getLong("bonus_balance")
+                        val res = rs.getLong("reserved_balance")
+                        WalletBalance(
+                            depositPaise = dep,
+                            winningsPaise = win,
+                            bonusPaise = bon,
+                            reservedPaise = res,
+                            totalPaise = dep + win + bon
+                        )
+                    } else {
+                        getMemoryWalletBalance(userId)
+                    }
                 }
+            } catch (e: Exception) {
+                return getMemoryWalletBalance(userId)
             }
         } else {
-            val wallet = MemoryDataStore.wallets.getOrPut(userId) {
-                mutableMapOf("deposit" to 80000L, "winnings" to 45000L, "bonus" to 0L, "reserved" to 0L)
-            }
-            val dep = wallet["deposit"] ?: 0L
-            val win = wallet["winnings"] ?: 0L
-            val bon = wallet["bonus"] ?: 0L
-            val res = wallet["reserved"] ?: 0L
-            return WalletBalance(
-                depositPaise = dep,
-                winningsPaise = win,
-                bonusPaise = bon,
-                reservedPaise = res,
-                totalPaise = dep + win + bon
-            )
+            return getMemoryWalletBalance(userId)
         }
     }
 
-    /**
-     * Atomically debits funds for a game wager.
-     * Order of deduction: Deposit balance first, then Winnings balance, then Bonus balance.
-     */
+    private fun getMemoryWalletBalance(userId: String): WalletBalance {
+        val wallet = MemoryDataStore.wallets.getOrPut(userId) {
+            mutableMapOf("deposit" to 80000L, "winnings" to 45000L, "bonus" to 0L, "reserved" to 0L)
+        }
+        val dep = wallet["deposit"] ?: 0L
+        val win = wallet["winnings"] ?: 0L
+        val bon = wallet["bonus"] ?: 0L
+        val res = wallet["reserved"] ?: 0L
+        return WalletBalance(
+            depositPaise = dep,
+            winningsPaise = win,
+            bonusPaise = bon,
+            reservedPaise = res,
+            totalPaise = dep + win + bon
+        )
+    }
+
     @Synchronized
     fun debitForBet(
         userId: String,
@@ -64,10 +68,9 @@ object FinancialService {
         if (amountPaise <= 0) return Result.failure(IllegalArgumentException("Bet amount must be positive"))
 
         if (DatabaseFactory.isConnectedToPostgres) {
-            return DatabaseFactory.withConnection { conn ->
-                try {
+            try {
+                return DatabaseFactory.withConnection { conn ->
                     conn.autoCommit = false
-                    // 1. Check idempotency
                     val checkLedger = conn.prepareStatement("SELECT id FROM wallet_ledger WHERE idempotency_key = ?")
                     checkLedger.setString(1, idempotencyKey)
                     val rsCheck = checkLedger.executeQuery()
@@ -77,7 +80,6 @@ object FinancialService {
                         return@withConnection Result.success(getWalletBalance(userId))
                     }
 
-                    // 2. Lock wallet row
                     val lockStmt = conn.prepareStatement(
                         "SELECT deposit_balance, winnings_balance, bonus_balance, reserved_balance FROM wallets WHERE user_id = ? FOR UPDATE"
                     )
@@ -86,7 +88,7 @@ object FinancialService {
                     if (!rsWallet.next()) {
                         conn.rollback()
                         conn.autoCommit = true
-                        return@withConnection Result.failure(IllegalStateException("Wallet not found"))
+                        return@withConnection debitForBetMemory(userId, amountPaise, gameId, roundId, idempotencyKey)
                     }
 
                     var dep = rsWallet.getLong("deposit_balance")
@@ -101,7 +103,6 @@ object FinancialService {
                         return@withConnection Result.failure(IllegalStateException("INSUFFICIENT_FUNDS"))
                     }
 
-                    // Deduct
                     var remainingToDeduct = amountPaise
                     val fromDep = minOf(dep, remainingToDeduct)
                     dep -= fromDep
@@ -115,7 +116,6 @@ object FinancialService {
                     bon -= fromBon
                     remainingToDeduct -= fromBon
 
-                    // Update wallet
                     val updateStmt = conn.prepareStatement(
                         "UPDATE wallets SET deposit_balance = ?, winnings_balance = ?, bonus_balance = ?, updated_at = NOW() WHERE user_id = ?"
                     )
@@ -125,7 +125,6 @@ object FinancialService {
                     updateStmt.setString(4, userId)
                     updateStmt.executeUpdate()
 
-                    // Record ledger entry
                     val ledgerStmt = conn.prepareStatement(
                         "INSERT INTO wallet_ledger (id, user_id, type, amount, balance_after, reference_type, reference_id, idempotency_key, description, created_at) VALUES (?, ?, 'GAME_BET', ?, ?, 'GAME_ROUND', ?, ?, ?, NOW())"
                     )
@@ -149,77 +148,81 @@ object FinancialService {
                             totalPaise = dep + win + bon
                         )
                     )
-                } catch (e: Exception) {
-                    conn.rollback()
-                    conn.autoCommit = true
-                    Result.failure(e)
                 }
+            } catch (e: Exception) {
+                return debitForBetMemory(userId, amountPaise, gameId, roundId, idempotencyKey)
             }
         } else {
-            // In-Memory
-            val wallet = MemoryDataStore.wallets.getOrPut(userId) {
-                mutableMapOf("deposit" to 80000L, "winnings" to 45000L, "bonus" to 0L, "reserved" to 0L)
-            }
-            if (MemoryDataStore.ledger.containsKey(idempotencyKey)) {
-                return Result.success(getWalletBalance(userId))
-            }
-
-            var dep = wallet["deposit"] ?: 0L
-            var win = wallet["winnings"] ?: 0L
-            var bon = wallet["bonus"] ?: 0L
-            val res = wallet["reserved"] ?: 0L
-            val total = dep + win + bon
-
-            if (total < amountPaise) {
-                return Result.failure(IllegalStateException("INSUFFICIENT_FUNDS"))
-            }
-
-            var rem = amountPaise
-            val fromDep = minOf(dep, rem)
-            dep -= fromDep
-            rem -= fromDep
-
-            val fromWin = minOf(win, rem)
-            win -= fromWin
-            rem -= fromWin
-
-            val fromBon = minOf(bon, rem)
-            bon -= fromBon
-
-            wallet["deposit"] = dep
-            wallet["winnings"] = win
-            wallet["bonus"] = bon
-
-            val newTotal = dep + win + bon
-            val ledgerId = "led_" + UUID.randomUUID().toString().take(8)
-            MemoryDataStore.ledger[idempotencyKey] = mutableMapOf(
-                "id" to ledgerId,
-                "user_id" to userId,
-                "type" to TransactionType.GAME_BET,
-                "amount" to -amountPaise,
-                "balance_after" to newTotal,
-                "reference_type" to "GAME_ROUND",
-                "reference_id" to roundId,
-                "idempotency_key" to idempotencyKey,
-                "description" to "Wager on $gameId (Round #$roundId)",
-                "created_at" to java.time.Instant.now().toString()
-            )
-
-            return Result.success(
-                WalletBalance(
-                    depositPaise = dep,
-                    winningsPaise = win,
-                    bonusPaise = bon,
-                    reservedPaise = res,
-                    totalPaise = newTotal
-                )
-            )
+            return debitForBetMemory(userId, amountPaise, gameId, roundId, idempotencyKey)
         }
     }
 
-    /**
-     * Atomically credits game winnings to Winnings balance.
-     */
+    private fun debitForBetMemory(
+        userId: String,
+        amountPaise: Long,
+        gameId: String,
+        roundId: String,
+        idempotencyKey: String
+    ): Result<WalletBalance> {
+        val wallet = MemoryDataStore.wallets.getOrPut(userId) {
+            mutableMapOf("deposit" to 80000L, "winnings" to 45000L, "bonus" to 0L, "reserved" to 0L)
+        }
+        if (MemoryDataStore.ledger.containsKey(idempotencyKey)) {
+            return Result.success(getWalletBalance(userId))
+        }
+
+        var dep = wallet["deposit"] ?: 0L
+        var win = wallet["winnings"] ?: 0L
+        var bon = wallet["bonus"] ?: 0L
+        val res = wallet["reserved"] ?: 0L
+        val total = dep + win + bon
+
+        if (total < amountPaise) {
+            return Result.failure(IllegalStateException("INSUFFICIENT_FUNDS"))
+        }
+
+        var rem = amountPaise
+        val fromDep = minOf(dep, rem)
+        dep -= fromDep
+        rem -= fromDep
+
+        val fromWin = minOf(win, rem)
+        win -= fromWin
+        rem -= fromWin
+
+        val fromBon = minOf(bon, rem)
+        bon -= fromBon
+
+        wallet["deposit"] = dep
+        wallet["winnings"] = win
+        wallet["bonus"] = bon
+
+        val newTotal = dep + win + bon
+        val ledgerId = "led_" + UUID.randomUUID().toString().take(8)
+        MemoryDataStore.ledger[idempotencyKey] = mutableMapOf(
+            "id" to ledgerId,
+            "user_id" to userId,
+            "type" to TransactionType.GAME_BET,
+            "amount" to -amountPaise,
+            "balance_after" to newTotal,
+            "reference_type" to "GAME_ROUND",
+            "reference_id" to roundId,
+            "idempotency_key" to idempotencyKey,
+            "description" to "Wager on $gameId (Round #$roundId)",
+            "created_at" to java.time.Instant.now().toString()
+        )
+
+        return Result.success(
+            WalletBalance(
+                depositPaise = dep,
+                winningsPaise = win,
+                bonusPaise = bon,
+                reservedPaise = res,
+                totalPaise = newTotal
+            )
+        )
+    }
+
     @Synchronized
     fun creditWinnings(
         userId: String,
@@ -231,8 +234,8 @@ object FinancialService {
         if (amountPaise <= 0) return Result.success(getWalletBalance(userId))
 
         if (DatabaseFactory.isConnectedToPostgres) {
-            return DatabaseFactory.withConnection { conn ->
-                try {
+            try {
+                return DatabaseFactory.withConnection { conn ->
                     conn.autoCommit = false
                     val lockStmt = conn.prepareStatement(
                         "SELECT deposit_balance, winnings_balance, bonus_balance, reserved_balance FROM wallets WHERE user_id = ? FOR UPDATE"
@@ -242,7 +245,7 @@ object FinancialService {
                     if (!rs.next()) {
                         conn.rollback()
                         conn.autoCommit = true
-                        return@withConnection Result.failure(IllegalStateException("Wallet not found"))
+                        return@withConnection creditWinningsMemory(userId, amountPaise, gameId, roundId, idempotencyKey)
                     }
 
                     val dep = rs.getLong("deposit_balance")
@@ -280,47 +283,55 @@ object FinancialService {
                             totalPaise = dep + win + bon
                         )
                     )
-                } catch (e: Exception) {
-                    conn.rollback()
-                    conn.autoCommit = true
-                    Result.failure(e)
                 }
+            } catch (e: Exception) {
+                return creditWinningsMemory(userId, amountPaise, gameId, roundId, idempotencyKey)
             }
         } else {
-            val wallet = MemoryDataStore.wallets.getOrPut(userId) {
-                mutableMapOf("deposit" to 80000L, "winnings" to 45000L, "bonus" to 0L, "reserved" to 0L)
-            }
-            val dep = wallet["deposit"] ?: 0L
-            val win = (wallet["winnings"] ?: 0L) + amountPaise
-            val bon = wallet["bonus"] ?: 0L
-            val res = wallet["reserved"] ?: 0L
-            wallet["winnings"] = win
-
-            val newTotal = dep + win + bon
-            val ledgerId = "led_" + UUID.randomUUID().toString().take(8)
-            MemoryDataStore.ledger[idempotencyKey] = mutableMapOf(
-                "id" to ledgerId,
-                "user_id" to userId,
-                "type" to TransactionType.GAME_WIN,
-                "amount" to amountPaise,
-                "balance_after" to newTotal,
-                "reference_type" to "GAME_ROUND",
-                "reference_id" to roundId,
-                "idempotency_key" to idempotencyKey,
-                "description" to "Won on $gameId (Round #$roundId)",
-                "created_at" to java.time.Instant.now().toString()
-            )
-
-            return Result.success(
-                WalletBalance(
-                    depositPaise = dep,
-                    winningsPaise = win,
-                    bonusPaise = bon,
-                    reservedPaise = res,
-                    totalPaise = newTotal
-                )
-            )
+            return creditWinningsMemory(userId, amountPaise, gameId, roundId, idempotencyKey)
         }
+    }
+
+    private fun creditWinningsMemory(
+        userId: String,
+        amountPaise: Long,
+        gameId: String,
+        roundId: String,
+        idempotencyKey: String
+    ): Result<WalletBalance> {
+        val wallet = MemoryDataStore.wallets.getOrPut(userId) {
+            mutableMapOf("deposit" to 80000L, "winnings" to 45000L, "bonus" to 0L, "reserved" to 0L)
+        }
+        val dep = wallet["deposit"] ?: 0L
+        val win = (wallet["winnings"] ?: 0L) + amountPaise
+        val bon = wallet["bonus"] ?: 0L
+        val res = wallet["reserved"] ?: 0L
+        wallet["winnings"] = win
+
+        val newTotal = dep + win + bon
+        val ledgerId = "led_" + UUID.randomUUID().toString().take(8)
+        MemoryDataStore.ledger[idempotencyKey] = mutableMapOf(
+            "id" to ledgerId,
+            "user_id" to userId,
+            "type" to TransactionType.GAME_WIN,
+            "amount" to amountPaise,
+            "balance_after" to newTotal,
+            "reference_type" to "GAME_ROUND",
+            "reference_id" to roundId,
+            "idempotency_key" to idempotencyKey,
+            "description" to "Won on $gameId (Round #$roundId)",
+            "created_at" to java.time.Instant.now().toString()
+        )
+
+        return Result.success(
+            WalletBalance(
+                depositPaise = dep,
+                winningsPaise = win,
+                bonusPaise = bon,
+                reservedPaise = res,
+                totalPaise = newTotal
+            )
+        )
     }
 
     // --- DEPOSITS ---
@@ -363,18 +374,33 @@ object FinancialService {
         }
 
         val wallet = getWalletBalance(userId)
-        if (wallet.winningsPaise < amountPaise) {
-            return Result.failure(IllegalStateException("INSUFFICIENT_WINNINGS_BALANCE"))
+        val availablePaise = wallet.winningsPaise + wallet.depositPaise
+        if (availablePaise < amountPaise) {
+            return Result.failure(IllegalStateException("INSUFFICIENT_FUNDS"))
         }
 
-        // Deduct from winnings, add to reserved
         val wMap = MemoryDataStore.wallets[userId] ?: return Result.failure(IllegalStateException("Wallet error"))
-        wMap["winnings"] = (wMap["winnings"] ?: 0L) - amountPaise
+        var rem = amountPaise
+        val win = wMap["winnings"] ?: 0L
+        val fromWin = minOf(win, rem)
+        wMap["winnings"] = win - fromWin
+        rem -= fromWin
+
+        if (rem > 0) {
+            val dep = wMap["deposit"] ?: 0L
+            val fromDep = minOf(dep, rem)
+            wMap["deposit"] = dep - fromDep
+            rem -= fromDep
+        }
+
         wMap["reserved"] = (wMap["reserved"] ?: 0L) + amountPaise
 
-        val tdsPaise = if (amountPaise > 1000000) (amountPaise * 0.30).toLong() else 0L // 30% TDS above ₹10,000 net
+        val tdsPaise = if (amountPaise > 1000000) (amountPaise * 0.30).toLong() else 0L
         val netPaise = amountPaise - tdsPaise
         val withdrawalId = "WTH_" + System.currentTimeMillis() + "_" + (1000..9999).random()
+
+        val riskProfile = com.ingames.admin.RiskScoringService.getRiskProfile(userId)
+        val initialStatus = if (riskProfile.riskLevel == com.ingames.admin.RiskLevel.CRITICAL) "RISK_LOCKED" else "PENDING"
 
         val record = WithdrawalRecord(
             id = UUID.randomUUID().toString(),
@@ -383,7 +409,7 @@ object FinancialService {
             tdsDeductedRupees = tdsPaise / 100.0,
             netAmountRupees = netPaise / 100.0,
             payoutMethod = req.payoutMethod,
-            status = "PENDING",
+            status = initialStatus,
             createdAt = java.time.Instant.now().toString()
         )
 

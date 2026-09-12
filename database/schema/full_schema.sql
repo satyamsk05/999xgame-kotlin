@@ -1,0 +1,2 @@
+-- Master DDL Schema for 999xgame
+-- Includes users, profiles, wallets, ledger, deposits, withdrawals, games, bets, rounds, audit_logs

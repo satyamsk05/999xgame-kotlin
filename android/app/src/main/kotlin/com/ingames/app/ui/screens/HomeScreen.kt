@@ -15,6 +15,7 @@ import com.ingames.app.data.TokenManager
 import com.ingames.app.ui.components.ChampionsLeagueBanner
 import com.ingames.app.ui.components.GameCard
 import com.ingames.app.ui.components.OnlineTicker
+import com.ingames.app.ui.components.ShimmerCardSkeleton
 import com.ingames.app.ui.components.TopHeader
 import com.ingames.models.GameInfo
 import kotlinx.coroutines.launch

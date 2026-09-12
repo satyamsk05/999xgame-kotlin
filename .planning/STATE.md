@@ -1,16 +1,14 @@
 ---
 gsd_state_version: "1.0"
-milestone: v1.2
-milestone_name: Advanced Admin Analytics & Risk Scoring
-status: Awaiting next milestone
-last_updated: "2026-09-12T11:10:28.894Z"
+milestone: v1.3
+milestone_name: VIP Loyalty Tier & Cashback Engine
+status: planning
+last_updated: "2026-09-12T11:12:15.469Z"
 last_activity: 2026-09-12
-last_activity_desc: Milestone v1.2 completed and archived
-state_head: b6e5449c08b4074b140911689836121c006a305d
 progress:
-  total_phases: 1
+  total_phases: 0
   completed_phases: 0
-  total_plans: 1
+  total_plans: 0
   completed_plans: 0
   percent: 0
 ---
@@ -19,10 +17,10 @@ progress:
 
 ## Current Position
 
-Phase: Milestone v1.2 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-09-12 — Milestone v1.2 completed and archived
+Status: Defining requirements
+Last activity: 2026-09-12 — Milestone v1.3 started
 
 ## Accomplishments
 

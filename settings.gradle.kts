@@ -18,4 +18,7 @@ rootProject.name = "999xgame"
 
 include(":shared")
 include(":backend")
+include(":admin")
+include(":games")
 include(":android:app")
+

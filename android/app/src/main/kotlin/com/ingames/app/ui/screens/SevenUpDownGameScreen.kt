@@ -20,6 +20,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.sp
 import com.ingames.app.data.ApiClient
 import com.ingames.app.ui.theme.*
@@ -52,6 +54,7 @@ fun SevenUpDownGameScreen(
     var placedBets by remember { mutableStateOf<Map<SevenUpDownBetArea, Long>>(emptyMap()) }
     var toastMessage by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
+    val haptic = LocalHapticFeedback.current
 
     // Simulation loop for responsive gameplay
     LaunchedEffect(Unit) {

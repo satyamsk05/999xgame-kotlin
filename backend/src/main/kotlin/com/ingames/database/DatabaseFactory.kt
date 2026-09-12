@@ -92,6 +92,8 @@ object MemoryDataStore {
     val bets = ConcurrentHashMap<String, MutableMap<String, Any?>>()
     val settlements = ConcurrentHashMap<String, MutableMap<String, Any?>>()
     val promotions = ConcurrentHashMap<String, MutableMap<String, Any?>>()
+    val games = ConcurrentHashMap<String, MutableMap<String, Any?>>()
+    val auditLogs = java.util.concurrent.CopyOnWriteArrayList<com.ingames.models.AdminAuditLogEntry>()
 
     private val roundSeq = AtomicLong(1000)
 
