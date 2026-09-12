@@ -9,9 +9,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -101,12 +103,22 @@ fun ShareScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "Refer & Earn",
-                        color = Color.White,
-                        fontSize = 32.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(onClick = onBackClick) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back",
+                                tint = Color.White
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "Refer & Earn",
+                            color = Color.White,
+                            fontSize = 32.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
 
                     Box(
                         modifier = Modifier
@@ -362,11 +374,11 @@ fun ShareScreen(
                             }
 
                             if (index < referrals.size - 1) {
-                                Divider(color = Color(0xFF2A104E), thickness = 1.dp)
+                                HorizontalDivider(color = Color(0xFF2A104E), thickness = 1.dp)
                             }
                         }
 
-                        Divider(color = Color(0xFF2A104E), thickness = 1.dp)
+                        HorizontalDivider(color = Color(0xFF2A104E), thickness = 1.dp)
                         Spacer(modifier = Modifier.height(10.dp))
 
                         // View all referrals button

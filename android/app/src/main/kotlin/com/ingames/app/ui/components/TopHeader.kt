@@ -130,7 +130,10 @@ fun TopHeader(
                         colors = listOf(Color(0xFF00B57F), Color(0xFF009A69))
                     )
                 )
-                .clickable { onAddCashClick() }
+                .clickable {
+                    onWalletClick()
+                    onAddCashClick()
+                }
                 .padding(horizontal = 14.dp, vertical = 9.dp)
         ) {
             AsyncImage(

@@ -8,8 +8,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -230,7 +231,7 @@ fun ProfileScreen(
                     }
 
                     Spacer(modifier = Modifier.height(14.dp))
-                    Divider(color = Color(0xFF2A104E), thickness = 1.dp)
+                    HorizontalDivider(color = Color(0xFF2A104E), thickness = 1.dp)
                     Spacer(modifier = Modifier.height(14.dp))
 
                     // Winnings Row
@@ -291,7 +292,7 @@ fun ProfileScreen(
                     }
 
                     Spacer(modifier = Modifier.height(14.dp))
-                    Divider(color = Color(0xFF2A104E), thickness = 1.dp)
+                    HorizontalDivider(color = Color(0xFF2A104E), thickness = 1.dp)
                     Spacer(modifier = Modifier.height(14.dp))
 
                     // Rush Rewards Row
@@ -426,6 +427,65 @@ fun ProfileScreen(
                         fontSize = 10.sp,
                         fontWeight = FontWeight.ExtraBold
                     )
+                }
+            }
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(20.dp))
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(Color(0xFF1B0B33))
+                    .padding(vertical = 8.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onFairPlayClick() }
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(imageVector = Icons.Default.VerifiedUser, contentDescription = null, tint = Color(0xFF00E676), modifier = Modifier.size(20.dp))
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(text = "Fair Play Policy", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                    }
+                    Icon(imageVector = Icons.Default.ChevronRight, contentDescription = null, tint = Color(0xFF7A6B94))
+                }
+                HorizontalDivider(color = Color(0xFF2A104E), thickness = 1.dp)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onContactClick() }
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ContactSupport, contentDescription = null, tint = Color(0xFFFFB74D), modifier = Modifier.size(20.dp))
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(text = "Contact Us", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                    }
+                    Icon(imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = Color(0xFF7A6B94))
+                }
+                HorizontalDivider(color = Color(0xFF2A104E), thickness = 1.dp)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onLogoutClick() }
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(imageVector = Icons.AutoMirrored.Filled.Logout, contentDescription = null, tint = Color(0xFFFF4757), modifier = Modifier.size(20.dp))
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(text = "Logout", color = Color(0xFFFF4757), fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                    }
+                    Icon(imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = Color(0xFF7A6B94))
                 }
             }
         }
