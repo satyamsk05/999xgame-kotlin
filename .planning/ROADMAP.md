@@ -7,7 +7,7 @@
 
 ## Active Milestone: v1.1 UI Polish & Live Streaming Enhancements
 
-- [ ] **Phase 7: UI Polish & Live Streaming Enhancements**
+- [x] **Phase 7: UI Polish & Live Streaming Enhancements**
   - Implement shimmer loading skeleton placeholders for `HomeScreen`.
   - Implement `RealtimeClient` offline reconnection banner & exponential backoff retry.
   - Add tactile haptic feedback on bet placement & cashout buttons.
