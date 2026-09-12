@@ -47,3 +47,14 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+tasks.register<Jar>("buildFatJar") {
+    archiveFileName.set("backend-all.jar")
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest {
+        attributes["Main-Class"] = "com.ingames.ApplicationKt"
+    }
+    val dependencies = configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) }
+    from(dependencies)
+    with(tasks.named<Jar>("jar").get())
+}
